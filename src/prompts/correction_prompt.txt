@@ -1,0 +1,9 @@
+You are given a Python method that has encountered an error. Below is the code of the method and the error details. Your task is to provide a corrected version of the method.
+
+Method code:
+{current_code}
+
+Error:
+{error_details}
+
+Please provide the corrected method code without any additional text.

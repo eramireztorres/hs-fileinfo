@@ -1,0 +1,11 @@
+def serialize(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    elif isinstance(obj, bytes):
+        return obj.decode('utf-8', errors='ignore')
+    elif isinstance(obj, IFDRational):
+        return float(obj)
+    elif hasattr(obj, '__dict__'):
+        return obj.__dict__
+    else:
+        raise TypeError(f"Type {type(obj)} not serializable")

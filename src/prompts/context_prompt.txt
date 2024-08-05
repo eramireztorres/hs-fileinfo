@@ -1,0 +1,5 @@
+You are given a text content extracted from a file. Your task is to provide additional contextual information about the content. This could include  technical, cultural, scientific, historical, or any other relevant context.
+
+Text Content:
+{}
+

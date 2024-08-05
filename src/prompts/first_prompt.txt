@@ -1,0 +1,155 @@
+You are given a Python method that receives an input path and additional information in a dictionary. The current method's purpose is to return a dictionary that includes the original path and relevant information extracted from the file. The current method and the last result it produced are provided below.
+
+Current Method:
+{}
+Last Result:
+{}
+
+=== SEPARATOR ===
+
+Objective:
+Your task is to improve this method to extract as much basic information as possible from the file specified by the path. The improved method should handle the specific file type provided in the last result and extract relevant information for that type only. The original path and any previously extracted information must always be included in the returned dictionary.
+
+The improved method must:
+- Ensure the initial test (returning the path) continues to work.
+- Try to import any necessary modules within a try block and proceed only if the import is successful.
+- Return only the executable code for the new method without any comments, markdown formatting, or additional text.
+- Focus exclusively on improving the information extraction for the specific file type provided in the last result. Do not generalize to other file types.
+
+Some Installed Packages you may use:
+- openai
+- fpdf2
+- pandas
+- matplotlib
+- seaborn
+- plotly
+- Pillow
+- pydub
+- nltk
+- wordcloud
+- pytesseract
+- numpy
+- scipy
+- librosa
+- PyPDF2
+- pdf2image
+- openpyxl
+- python-docx
+- python-pptx
+- sqlalchemy
+- h5py
+- tqdm
+- opencv-python
+- ffmpeg-python
+- moviepy
+- joblib
+- patol
+- xlrd
+- mutagen
+- cairosvg
+- lxml
+- rarfile
+- python-magic
+- python-magic-bin	
+- py7zr
+- odfpy
+- epub
+- regipy
+- mido
+- markdown
+- configparser
+- python-chess
+- ebooklib
+- tesseract
+
+Examples:
+
+1. **Text File (txt):**
+   - Current Method:
+     def read_file_info(self):
+         return {{'path': self.file_path}}
+   - Last Result:
+     {{'path': 'path/to/file.txt'}}
+   - Improved Method:
+     def read_file_info(self):
+         info = {{'path': self.file_path}}
+         try:
+             with open(self.file_path, 'r') as file:
+                 content = file.read()
+                 info['line_count'] = len(content.splitlines())
+                 info['word_count'] = len(content.split())
+                 info['char_count'] = len(content)
+                 info['text'] = content[:1000]  # Extract the first 1000 characters
+         except Exception as e:
+             info['error'] = str(e)
+         return info
+
+2. **CSV File (csv):**
+   - Current Method:
+     def read_file_info(self):
+         return {{'path': self.file_path}}
+   - Last Result:
+     {{'path': 'path/to/file.csv'}}
+   - Improved Method:
+     def read_file_info(self):
+         info = {{'path': self.file_path}}
+         try:
+             import csv
+             with open(self.file_path, 'r') as file:
+                 reader = csv.reader(file)
+                 rows = list(reader)
+                 info['row_count'] = len(rows)
+                 if rows:
+                     info['column_count'] = len(rows[0])
+                     info['cell_count'] = len(rows) * len(rows[0])
+         except Exception as e:
+             info['error'] = str(e)
+         return info
+
+3. **JSON File (json):**
+   - Current Method:
+     def read_file_info(self):
+         return {{'path': self.file_path}}
+   - Last Result:
+     {{'path': 'path/to/file.json'}}
+   - Improved Method:
+     def read_file_info(self):
+         info = {{'path': self.file_path}}
+         try:
+             import json
+             with open(self.file_path, 'r') as file:
+                 data = json.load(file)
+                 info['key_count'] = len(data)
+                 info['total_items'] = sum(len(v) if isinstance(v, (list, dict)) else 1 for v in data.values())
+         except Exception as e:
+             info['error'] = str(e)
+         return info
+
+4. **PDF File (pdf):**
+   - Current Method:
+     def read_file_info(self):
+         return {{'path': self.file_path}}
+   - Last Result:
+     {{'path': 'path/to/file.pdf'}}
+   - Improved Method:
+     def read_file_info(self):
+         info = {{'path': self.file_path}}
+         try:
+             from PyPDF2 import PdfReader
+             with open(self.file_path, 'rb') as file:
+                 reader = PdfReader(file)
+                 info['page_count'] = len(reader.pages)
+                 metadata = reader.metadata
+                 if metadata:
+                     info['title'] = metadata.title if hasattr(metadata, 'title') else None
+                     info['author'] = metadata.author if hasattr(metadata, 'author') else None
+                     info['subject'] = metadata.subject if hasattr(metadata, 'subject') else None
+                     info['producer'] = metadata.producer if hasattr(metadata, 'producer') else None
+                     info['creation_date'] = metadata.creation_date if hasattr(metadata, 'creation_date') else None
+                     info['keywords'] = metadata.keywords if hasattr(metadata, 'keywords') else None
+                     info['mod_date'] = metadata.mod_date if hasattr(metadata, 'mod_date') else None
+                     info['trapped'] = metadata.trapped if hasattr(metadata, 'trapped') else None
+                 info['text'] = ''.join([page.extract_text() for page in reader.pages[:10]])[:1000]  # Extract text from first 10 pages
+         except Exception as e:
+             info['error'] = str(e)
+         return info

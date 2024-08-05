@@ -1,0 +1,10 @@
+You are given information about a file and its extension. Your task is to provide additional contextual information about the file type. This should include:
+
+1. A brief explanation of what this file extension is and its primary uses.
+2. A brief history or development context if applicable.
+3. Some potential applications or use cases for files of this type.
+4. Any assumptions you can make about the analyzed file based on its name and provided attributes.
+
+File Name: {}
+File Extension: {}
+Additional Info: {}
