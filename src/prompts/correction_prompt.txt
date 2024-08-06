@@ -1,4 +1,4 @@
-You are given a Python method that has encountered an error. Below is the code of the method and the error details. Your task is to provide a corrected version of the method.
+You are given a Python method that has encountered an error. Below is the code of the method and the error details. Your task is to provide a corrected version of the method. Do not include any additional text, comments, or quotation marks. Only return the corrected code.
 
 Method code:
 {current_code}
@@ -6,4 +6,57 @@ Method code:
 Error:
 {error_details}
 
-Please provide the corrected method code without any additional text.
+Some Installed Packages you may use:
+- openai
+- fpdf2
+- pandas
+- matplotlib
+- seaborn
+- plotly
+- Pillow
+- pydub
+- nltk
+- wordcloud
+- pytesseract
+- numpy
+- scipy
+- librosa
+- PyPDF2
+- pdf2image
+- openpyxl
+- python-docx
+- python-pptx
+- sqlalchemy
+- h5py
+- tqdm
+- opencv-python
+- ffmpeg-python
+- moviepy
+- joblib
+- patol
+- xlrd
+- mutagen
+- cairosvg
+- lxml
+- rarfile
+- python-magic
+- python-magic-bin	
+- py7zr
+- odfpy
+- epub
+- regipy
+- mido
+- markdown
+- configparser
+- python-chess
+- ebooklib
+- svgpathtools
+- selenium
+
+
+Instructions:
+
+    Correct the method code using the available packages (imported within the corrected method) and/or Python kernel packages.
+Avoid any code line out of the corrected method.
+	The fix must either be to fix the error without using new external dependencies, or to remove the line that causes the error in the method.
+    Return only the corrected code without any additional text, comments, string markers, or quotes:

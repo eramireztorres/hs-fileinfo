@@ -8,18 +8,13 @@ Last Result:
 === SEPARATOR ===
 
 Objective:
+
 Your task is to improve this method to add graphic information related to the file specified by the path. The improved method should handle the specific file type provided in the last result and extract relevant graphic information for that type only. The original path and any previously extracted information must always be included in the returned dictionary.
 
-Examples of graphic information:
-- Image: Histogram and multiple filtered images such as contour, contrast, saturation, temperature, vignette, vintage, and black-and-white
-- CSV/Excel: data plots (scatter plots, histograms, etc.)
-- Audio: Waveform plot, Spectrogram
-- Text files: Word frequency analysis using a word cloud
-- Programming files: Code metrics visualization, code structure visualization
-
 The improved method must:
+
 - Ensure the initial test (returning the path) continues to work.
-- Try to import any necessary modules within a try block and proceed only if the import is successful.
+- Implement robust error handling using try/except blocks to capture and report errors without halting execution.
 - Create a subdirectory named "plots" in the current directory to save the generated plots.
 - Return only the executable code for the new method without any comments, markdown formatting, or additional text.
 - Focus exclusively on improving the graphic information extraction for the specific file type provided in the last result. Do not generalize to other file types.
@@ -58,7 +53,7 @@ Some Installed Packages you may use:
 - lxml
 - rarfile
 - python-magic
-- python-magic-bin	
+- python-magic-bin
 - py7zr
 - odfpy
 - epub
@@ -68,111 +63,158 @@ Some Installed Packages you may use:
 - configparser
 - python-chess
 - ebooklib
-- tesseract
+- svgpathtools
+- selenium
 
 Examples:
 
 1. **Image File (jpg):**
    - Current Method:
+      
      def read_file_info(self):
-         info = {{'path': self.file_path}}
+         info = {'path': self.file_path}
+         from PIL import Image
+         img = Image.open(self.file_path)
+         info['image_size'] = img.size
+         info['image_format'] = img.format
+         return info
+      
+
+   - Last Result:
+      json
+     {'path': 'path/to/file.jpg', 'image_size': (1024, 768), 'image_format': 'JPEG'}
+      
+
+   - Improved Method:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         from PIL import Image, ImageFilter, ImageEnhance
+         import matplotlib.pyplot as plt
+         import os
          try:
-             from PIL import Image
              img = Image.open(self.file_path)
              info['image_size'] = img.size
              info['image_format'] = img.format
          except Exception as e:
-             info['error'] = str(e)
+             info['image_open_error'] = str(e)
+             return info
+
+         # Create a directory for plots if not exists
+         plots_dir = 'plots'
+         os.makedirs(plots_dir, exist_ok=True)
+
+         # Histogram
+         try:
+             hist = img.histogram()
+             plt.figure()
+             plt.hist(hist, bins=256)
+             hist_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_hist.png'))
+             plt.savefig(hist_path)
+             plt.close()
+             info['histogram'] = hist_path
+         except Exception as e:
+             info['histogram_error'] = str(e)
+
+         # Contour Filter
+         try:
+             contour_img = img.filter(ImageFilter.CONTOUR)
+             contour_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_contour.jpg'))
+             contour_img.save(contour_img_path)
+             info['Contour'] = contour_img_path
+         except Exception as e:
+             info['contour_error'] = str(e)
+
+         # Contrast Filter
+         try:
+             contrast_img = ImageEnhance.Contrast(img).enhance(1.5)  # Increase contrast
+             contrast_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_contrast.jpg'))
+             contrast_img.save(contrast_img_path)
+             info['Contrast'] = contrast_img_path
+         except Exception as e:
+             info['contrast_error'] = str(e)
+
+         # Saturation Filter
+         try:
+             saturation_img = ImageEnhance.Color(img).enhance(1.5)  # Increase saturation
+             saturation_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_saturation.jpg'))
+             saturation_img.save(saturation_img_path)
+             info['Saturation'] = saturation_img_path
+         except Exception as e:
+             info['saturation_error'] = str(e)
+
+         # Temperature Filter
+         try:
+             temperature_img = img.convert("RGB")
+             r, g, b = temperature_img.split()
+             r = r.point(lambda i: i * 1.2)  # Increase red channel for warm effect
+             temperature_img = Image.merge('RGB', (r, g, b))
+             temperature_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_temperature.jpg'))
+             temperature_img.save(temperature_img_path)
+             info['Temperature'] = temperature_img_path
+         except Exception as e:
+             info['temperature_error'] = str(e)
+
+         # Vintage Filter
+         try:
+             vintage_img = ImageEnhance.Color(img).enhance(0.5)  # Desaturate
+             vintage_img = ImageEnhance.Contrast(vintage_img).enhance(0.8)  # Lower contrast
+             vintage_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_vintage.jpg'))
+             vintage_img.save(vintage_img_path)
+             info['Vintage'] = vintage_img_path
+         except Exception as e:
+             info['vintage_error'] = str(e)
+
+         # Black and White Filter
+         try:
+             bw_img = img.convert('L')
+             bw_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_bw.jpg'))
+             bw_img.save(bw_img_path)
+             info['Gray'] = bw_img_path
+         except Exception as e:
+             info['bw_error'] = str(e)
+
          return info
-   - Last Result:
-     {{'path': 'path/to/file.jpg', 'image_size': (1024, 768), 'image_format': 'JPEG'}}
-   - Improved Method:
-def read_file_info(self):
-    info = {'path': self.file_path}
-    try:
-        from PIL import Image, ImageFilter, ImageEnhance
-        import matplotlib.pyplot as plt
-        import os
-
-        img = Image.open(self.file_path)
-        info['image_size'] = img.size
-        info['image_format'] = img.format
-
-        # Create a directory for plots if not exists
-        plots_dir = 'plots'
-        os.makedirs(plots_dir, exist_ok=True)
-
-        # Histogram
-        hist = img.histogram()
-        plt.figure()
-        plt.hist(hist, bins=256)
-        hist_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_hist.png'))
-        plt.savefig(hist_path)
-        plt.close()
-        info['histogram'] = hist_path
-
-        # Contour Filter
-        contour_img = img.filter(ImageFilter.CONTOUR)
-        contour_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_contour.jpg'))
-        contour_img.save(contour_img_path)
-        info['Contour'] = contour_img_path
-
-        # Contrast Filter
-        contrast_img = ImageEnhance.Contrast(img).enhance(1.5)  # Increase contrast
-        contrast_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_contrast.jpg'))
-        contrast_img.save(contrast_img_path)
-        info['Contrast'] = contrast_img_path
-
-        # Saturation Filter
-        saturation_img = ImageEnhance.Color(img).enhance(1.5)  # Increase saturation
-        saturation_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_saturation.jpg'))
-        saturation_img.save(saturation_img_path)
-        info['Saturation'] = saturation_img_path
-
-        # Temperature Filter
-        temperature_img = img.convert("RGB")
-        r, g, b = temperature_img.split()
-        r = r.point(lambda i: i * 1.2)  # Increase red channel for warm effect
-        temperature_img = Image.merge('RGB', (r, g, b))
-        temperature_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_temperature.jpg'))
-        temperature_img.save(temperature_img_path)
-        info['Temperature'] = temperature_img_path
-
-        # Vintage Filter
-        vintage_img = ImageEnhance.Color(img).enhance(0.5)  # Desaturate
-        vintage_img = ImageEnhance.Contrast(vintage_img).enhance(0.8)  # Lower contrast
-        vintage_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_vintage.jpg'))
-        vintage_img.save(vintage_img_path)
-        info['Vintage'] = vintage_img_path
-
-        # Black and White Filter
-        bw_img = img.convert('L')
-        bw_img_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.jpg', '_bw.jpg'))
-        bw_img.save(bw_img_path)
-        info['Gray'] = bw_img_path
-
-    except Exception as e:
-        info['error'] = str(e)
-    return info
-
+      
 
 2. **CSV File (csv):**
    - Current Method:
+      
      def read_file_info(self):
-         return {{'path': self.file_path}}
+         info = {'path': self.file_path}
+         import csv
+         with open(self.file_path, 'r') as file:
+             reader = csv.reader(file)
+             rows = list(reader)
+             info['row_count'] = len(rows)
+             if rows:
+                 info['column_count'] = len(rows[0])
+                 info['cell_count'] = len(rows) * len(rows[0])
+         return info
+      
+
    - Last Result:
-     {{'path': 'path/to/file.csv'}}
+      json
+     {'path': 'path/to/file.csv'}
+      
+
    - Improved Method:
+      
      def read_file_info(self):
-         info = {{'path': self.file_path}}
+         info = {'path': self.file_path}
+         import pandas as pd
+         import matplotlib.pyplot as plt
+         import os
+         os.makedirs('plots', exist_ok=True)
          try:
-             import pandas as pd
-             import matplotlib.pyplot as plt
-             import os
-             os.makedirs('plots', exist_ok=True)
              df = pd.read_csv(self.file_path)
              info['row_count'] = len(df)
              info['column_count'] = len(df.columns)
+         except Exception as e:
+             info['csv_read_error'] = str(e)
+             return info
+
+         try:
              for col in df.select_dtypes(include=['number']).columns:
                  plt.figure()
                  df[col].plot(kind='hist')
@@ -180,10 +222,14 @@ def read_file_info(self):
                  plt.savefig(hist_path)
                  plt.close()
                  info[f'{col}_hist'] = hist_path
+         except Exception as e:
+             info['histogram_plot_error'] = str(e)
+
+         try:
              if len(df.select_dtypes(include=['number']).columns) >= 2:
                  cols = df.select_dtypes(include=['number']).columns
                  for i in range(len(cols)):
-                     for j in range(i+1, len(cols)):
+                     for j in range(i + 1, len(cols)):
                          plt.figure()
                          df.plot(x=cols[i], y=cols[j], kind='scatter')
                          scatter_path = os.path.join('plots', os.path.basename(self.file_path).replace('.csv', f'_{cols[i]}_vs_{cols[j]}_scatter.png'))
@@ -191,81 +237,408 @@ def read_file_info(self):
                          plt.close()
                          info[f'{cols[i]}_vs_{cols[j]}_scatter'] = scatter_path
          except Exception as e:
-             info['error'] = str(e)
+             info['scatter_plot_error'] = str(e)
+
          return info
+      
 
 3. **Audio File (wav):**
    - Current Method:
+      
      def read_file_info(self):
-         info = {{'path': self.file_path}}
+         info = {'path': self.file_path}
+         import wave
+         with wave.open(self.file_path, 'rb') as wav_file:
+             info['nchannels'] = wav_file.getnchannels()
+             info['framerate'] = wav_file.getframerate()
+             info['nframes'] = wav_file.getnframes()
+         return info
+      
+
+   - Last Result:
+      json
+     {'path': 'path/to/file.wav', 'nchannels': 2, 'framerate': 44100, 'nframes': 100000}
+      
+
+   - Improved Method:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import wave
+         import numpy as np
+         import matplotlib.pyplot as plt
+         import os
+         os.makedirs('plots', exist_ok=True)
          try:
-             import wave
-             import numpy as np
-             import matplotlib.pyplot as plt
-             import os
-             os.makedirs('plots', exist_ok=True)
              with wave.open(self.file_path, 'rb') as wav_file:
-                 info['nchannels'] = wav_file.getnchannels()
-                 info['sampwidth'] = wav_file.getsampwidth()
-                 info['framerate'] = wav_file.getframerate()
-                 info['nframes'] = wav_file.getnframes()
-                 info['comptype'] = wav_file.getcomptype()
-                 info['compname'] = wav_file.getcompname()
-                 info['length'] = wav_file.getnframes() / wav_file.getframerate()
+                 try:
+                     info['nchannels'] = wav_file.getnchannels()
+                 except Exception as e:
+                     info['nchannels_error'] = str(e)
+                 try:
+                     info['sampwidth'] = wav_file.getsampwidth()
+                 except Exception as e:
+                     info['sampwidth_error'] = str(e)
+                 try:
+                     info['framerate'] = wav_file.getframerate()
+                 except Exception as e:
+                     info['framerate_error'] = str(e)
+                 try:
+                     info['nframes'] = wav_file.getnframes()
+                 except Exception as e:
+                     info['nframes_error'] = str(e)
+                 try:
+                     info['comptype'] = wav_file.getcomptype()
+                 except Exception as e:
+                     info['comptype_error'] = str(e)
+                 try:
+                     info['compname'] = wav_file.getcompname()
+                 except Exception as e:
+                     info['compname_error'] = str(e)
+                 try:
+                     info['length'] = wav_file.getnframes() / wav_file.getframerate()
+                 except Exception as e:
+                     info['length_error'] = str(e)
+                 
                  frames = wav_file.readframes(wav_file.getnframes())
                  audio_data = np.frombuffer(frames, dtype=np.int16)
-                 plt.figure()
-                 plt.plot(audio_data)
-                 waveform_path = os.path.join('plots', os.path.basename(self.file_path).replace('.wav', '_waveform.png'))
-                 plt.savefig(waveform_path)
-                 plt.close()
-                 info['waveform_plot'] = waveform_path
-                 plt.figure()
-                 plt.specgram(audio_data, Fs=wav_file.getframerate())
-                 spectrogram_path = os.path.join('plots', os.path.basename(self.file_path).replace('.wav', '_spectrogram.png'))
-                 plt.savefig(spectrogram_path)
-                 plt.close()
-                 info['spectrogram'] = spectrogram_path
+                 try:
+                     plt.figure()
+                     plt.plot(audio_data)
+                     waveform_path = os.path.join('plots', os.path.basename(self.file_path).replace('.wav', '_waveform.png'))
+                     plt.savefig(waveform_path)
+                     plt.close()
+                     info['waveform_plot'] = waveform_path
+                 except Exception as e:
+                     info['waveform_plot_error'] = str(e)
+                 
+                 try:
+                     plt.figure()
+                     plt.specgram(audio_data, Fs=wav_file.getframerate())
+                     spectrogram_path = os.path.join('plots', os.path.basename(self.file_path).replace('.wav', '_spectrogram.png'))
+                     plt.savefig(spectrogram_path)
+                     plt.close()
+                     info['spectrogram'] = spectrogram_path
+                 except Exception as e:
+                     info['spectrogram_plot_error'] = str(e)
          except Exception as e:
-             info['error'] = str(e)
+             info['audio_error'] = str(e)
          return info
+      
 
 4. **Text File (txt):**
    - Current Method:
+      
      def read_file_info(self):
-         info = {{'path': self.file_path}}
-         try:
-             with open(self.file_path, 'r') as file:
-                 content = file.read()
-                 info['line_count'] = len(content.splitlines())
-                 info['word_count'] = len(content.split())
-                 info['char_count'] = len(content)
-         except Exception as e:
-             info['error'] = str(e)
+         info = {'path': self.file_path}
+         with open(self.file_path, 'r') as file:
+             content = file.read()
+             info['line_count'] = len(content.splitlines())
+             info['word_count'] = len(content.split())
+             info['char_count'] = len(content)
          return info
+      
+
    - Last Result:
-     {{'path': 'path/to/file.txt', 'line_count': 100, 'word_count': 500, 'char_count': 3000}}
+      json
+     {'path': 'path/to/file.txt', 'line_count': 100, 'word_count': 500, 'char_count': 3000}
+      
+
    - Improved Method:
+      
      def read_file_info(self):
-         info = {{'path': self.file_path}}
+         info = {'path': self.file_path}
+         from wordcloud import WordCloud
+         import matplotlib.pyplot as plt
+         import os
+         os.makedirs('plots', exist_ok=True)
          try:
-             from wordcloud import WordCloud
-             import matplotlib.pyplot as plt
-             import os
-             os.makedirs('plots', exist_ok=True)
              with open(self.file_path, 'r') as file:
                  content = file.read()
-                 info['line_count'] = len(content.splitlines())
-                 info['word_count'] = len(content.split())
-                 info['char_count'] = len(content)
-                 wordcloud = WordCloud(width=800, height=400).generate(content)
-                 plt.figure()
-                 plt.imshow(wordcloud, interpolation='bilinear')
-                 plt.axis('off')
-                 wordcloud_path = os.path.join('plots', os.path.basename(self.file_path).replace('.txt', '_wordcloud.png'))
-                 plt.savefig(wordcloud_path)
-                 plt.close()
-                 info['wordcloud'] = wordcloud_path
+                 try:
+                     info['line_count'] = len(content.splitlines())
+                 except Exception as e:
+                     info['line_count_error'] = str(e)
+                 try:
+                     info['word_count'] = len(content.split())
+                 except Exception as e:
+                     info['word_count_error'] = str(e)
+                 try:
+                     info['char_count'] = len(content)
+                 except Exception as e:
+                     info['char_count_error'] = str(e)
          except Exception as e:
-             info['error'] = str(e)
+             info['text_file_error'] = str(e)
+             return info
+         
+         try:
+             wordcloud = WordCloud(width=800, height=400).generate(content)
+             plt.figure()
+             plt.imshow(wordcloud, interpolation='bilinear')
+             plt.axis('off')
+             wordcloud_path = os.path.join('plots', os.path.basename(self.file_path).replace('.txt', '_wordcloud.png'))
+             plt.savefig(wordcloud_path)
+             plt.close()
+             info['wordcloud'] = wordcloud_path
+         except Exception as e:
+             info['wordcloud_error'] = str(e)
+
          return info
+      
+
+5. **Spreadsheet File (XLSX):**
+   - Current Method:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import pandas as pd
+         df = pd.read_excel(self.file_path)
+         info['row_count'] = len(df)
+         info['column_count'] = len(df.columns)
+         return info
+      
+
+   - Last Result:
+      json
+     {'path': 'path/to/file.xlsx', 'row_count': 150, 'column_count': 10}
+      
+
+   - Improved Method:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import pandas as pd
+         import matplotlib.pyplot as plt
+         import seaborn as sns
+         import os
+         os.makedirs('plots', exist_ok=True)
+         try:
+             df = pd.read_excel(self.file_path)
+             info['row_count'] = len(df)
+             info['column_count'] = len(df.columns)
+         except Exception as e:
+             info['excel_read_error'] = str(e)
+             return info
+
+         try:
+             # Add Boxplot for numerical columns
+             for col in df.select_dtypes(include=['number']).columns:
+                 plt.figure()
+                 sns.boxplot(y=df[col], color='lightgreen')
+                 plt.title(f'Boxplot of {col}')
+                 plt.ylabel(col)
+                 boxplot_path = os.path.join('plots', os.path.basename(self.file_path).replace('.xlsx', f'_{col}_boxplot.png'))
+                 plt.savefig(boxplot_path)
+                 plt.close()
+                 info[f'{col}_boxplot'] = boxplot_path
+         except Exception as e:
+             info['boxplot_error'] = str(e)
+
+         return info
+      
+
+6. **SVG File (svg):**
+   - Current Method:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import xml.etree.ElementTree as ET
+         tree = ET.parse(self.file_path)
+         root = tree.getroot()
+         info['svg_tag'] = root.tag
+         info['width'] = root.attrib.get('width', 'unknown')
+         info['height'] = root.attrib.get('height', 'unknown')
+         return info
+      
+
+   - Last Result:
+      json
+     {'path': 'path/to/file.svg', 'svg_tag': '{http://www.w3.org/2000/svg}svg', 'width': '100', 'height': '100'}
+      
+
+   - Improved Method:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import xml.etree.ElementTree as ET
+         import cairosvg
+         from PIL import Image
+         import os
+
+         # Parse the SVG file
+         try:
+             tree = ET.parse(self.file_path)
+             root = tree.getroot()
+             try:
+                 info['svg_tag'] = root.tag
+             except Exception as e:
+                 info['svg_tag_error'] = str(e)
+             try:
+                 info['width'] = root.attrib.get('width', 'unknown')
+             except Exception as e:
+                 info['width_error'] = str(e)
+             try:
+                 info['height'] = root.attrib.get('height', 'unknown')
+             except Exception as e:
+                 info['height_error'] = str(e)
+         except Exception as e:
+             info['svg_parse_error'] = str(e)
+             return info
+
+         # Create plots directory if it doesn't exist
+         plots_dir = 'plots'
+         os.makedirs(plots_dir, exist_ok=True)
+
+         try:
+             # Convert SVG to PNG
+             png_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.svg', '.png'))
+             cairosvg.svg2png(url=self.file_path, write_to=png_path)
+         except Exception as e:
+             info['svg_to_png_error'] = str(e)
+             return info
+
+         try:
+             # Open the converted PNG to extract additional attributes
+             with Image.open(png_path) as img:
+                 info['converted_png'] = png_path
+                 info['png_image_size'] = img.size
+                 info['png_mode'] = img.mode
+                 info['png_format'] = img.format
+         except Exception as e:
+             info['png_image_error'] = str(e)
+
+         return info
+      
+
+7. **PDF File (pdf):**
+   - Current Method:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         from PyPDF2 import PdfReader
+         with open(self.file_path, 'rb') as file:
+             reader = PdfReader(file)
+             info['page_count'] = len(reader.pages)
+             metadata = reader.metadata
+             if metadata:
+                 info['title'] = metadata.get('title', None)
+                 info['author'] = metadata.get('author', None)
+                 info['subject'] = metadata.get('subject', None)
+                 info['producer'] = metadata.get('producer', None)
+                 info['creation_date'] = metadata.get('creation_date', None)
+                 info['keywords'] = metadata.get('keywords', None)
+                 info['mod_date'] = metadata.get('mod_date', None)
+                 info['trapped'] = metadata.get('trapped', None)
+             info['text'] = ''.join([page.extract_text() for page in reader.pages[:10]])[:1000]  # Extract text from first 10 pages
+         return info
+      
+
+   - Last Result:
+      json
+     {
+         "path": "path/to/file.pdf",
+         "page_count": 15,
+         "title": "Sample PDF Document",
+         "author": "John Doe",
+         "subject": "Sample Subject",
+         "producer": "PDF Producer",
+         "creation_date": "2023-08-12",
+         "keywords": "sample, pdf, test",
+         "mod_date": "2023-08-13",
+         "trapped": "False",
+         "text": "This is a sample text extracted from the first 10 pages of the PDF..."
+     }
+      
+
+   - Improved Method:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         from PyPDF2 import PdfReader
+         import matplotlib.pyplot as plt
+         import os
+         from wordcloud import WordCloud
+
+         # Initialize the PdfReader
+         try:
+             with open(self.file_path, 'rb') as file:
+                 reader = PdfReader(file)
+                 try:
+                     info['page_count'] = len(reader.pages)
+                 except Exception as e:
+                     info['page_count_error'] = str(e)
+
+                 # Extract metadata
+                 try:
+                     metadata = reader.metadata
+                     if metadata:
+                         info['title'] = metadata.get('title', 'Unknown Title')
+                         info['author'] = metadata.get('author', 'Unknown Author')
+                         info['subject'] = metadata.get('subject', 'Unknown Subject')
+                         info['producer'] = metadata.get('producer', 'Unknown Producer')
+                         info['creation_date'] = metadata.get('creation_date', 'Unknown Creation Date')
+                         info['keywords'] = metadata.get('keywords', 'No Keywords')
+                         info['mod_date'] = metadata.get('mod_date', 'Unknown Modification Date')
+                         info['trapped'] = metadata.get('trapped', 'Unknown Trapped Status')
+                 except Exception as e:
+                     info['metadata_error'] = str(e)
+
+                 # Extract text from first 10 pages
+                 try:
+                     text_content = ''.join([page.extract_text() for page in reader.pages[:10]])
+                     info['text'] = text_content[:1000]  # Limit to 1000 characters for preview
+                 except Exception as e:
+                     info['text_extraction_error'] = str(e)
+
+         except Exception as e:
+             info['pdf_read_error'] = str(e)
+             return info
+
+         # Create plots directory if it doesn't exist
+         plots_dir = 'plots'
+         os.makedirs(plots_dir, exist_ok=True)
+
+         try:
+             # Generate a WordCloud from the extracted text
+             wordcloud = WordCloud(width=800, height=400).generate(text_content)
+             plt.figure(figsize=(10, 5))
+             plt.imshow(wordcloud, interpolation='bilinear')
+             plt.axis('off')
+             wordcloud_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.pdf', '_wordcloud.png'))
+             plt.savefig(wordcloud_path)
+             plt.close()
+             info['wordcloud'] = wordcloud_path
+         except Exception as e:
+             info['wordcloud_error'] = str(e)
+
+         try:
+             # Plot metadata pie chart
+             metadata_labels = ['Title', 'Author', 'Subject', 'Producer', 'Creation Date', 'Keywords', 'Modification Date', 'Trapped']
+             metadata_values = [info.get(label.lower().replace(' ', '_'), None) for label in metadata_labels]
+             metadata_values = [value if value is not None else 'Unknown' for value in metadata_values]
+             plt.figure(figsize=(8, 6))
+             plt.pie([len(str(value)) for value in metadata_values], labels=metadata_labels, autopct='%1.1f%%', startangle=140)
+             plt.axis('equal')
+             metadata_pie_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.pdf', '_metadata_pie.png'))
+             plt.savefig(metadata_pie_path)
+             plt.close()
+             info['metadata_pie'] = metadata_pie_path
+         except Exception as e:
+             info['metadata_pie_error'] = str(e)
+
+         try:
+             # Calculate average characters per page
+             avg_chars_per_page = sum(len(page.extract_text()) for page in reader.pages) / len(reader.pages)
+             info['average_chars_per_page'] = avg_chars_per_page
+         except Exception as e:
+             info['avg_chars_error'] = str(e)
+
+         # Check if text extraction was successful
+         if not text_content.strip():
+             info['text_extraction_status'] = "No text found in the first 10 pages."
+         else:
+             info['text_extraction_status'] = "Text extracted successfully from the first 10 pages."
+
+         return info
+      
+

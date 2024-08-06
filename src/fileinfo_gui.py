@@ -8,7 +8,9 @@ import threading
 import logging
 import google.generativeai as genai
 
-from src.hs import MyClass, update_method_logic, generate_improved_method, generate_context_info
+from src.hs import MyClass, update_method_logic, generate_improved_method
+from src.hs import generate_context_info, clean_info_dict, MethodSanitizer
+
 from src.file_report import FileReport
 
 # Configure logging for debugging purposes
@@ -162,11 +164,14 @@ def method_logic(instance):
             # Initialize the instance
             instance = MyClass(file_path)
             logging.info(f'File path: {file_path}')
-
+            
+            # Main loop integration
             # Improve the method multiple times
             for iteration in range(improvements):
                 with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
                     current_method = file.read()
+                    
+                logging.info(f'Current method at {iteration} iteration:\n {current_method}')
 
                 last_result = instance.dynamic_method()
                 text_content = last_result.pop('text', None)
@@ -180,14 +185,47 @@ def method_logic(instance):
 
                 logging.info(f"Iteration {iteration + 1}: Improved Method Logic\n{improved_method}")
 
+                # Use MethodSanitizer to clean the improved method
+                # sanitizer = MethodSanitizer(improved_method)
+                # sanitized_method = sanitizer.sanitize()
+                
                 sanitized_method = re.sub(r'^```.*\n', '', improved_method).strip().strip('```').strip()
                 sanitized_method = re.sub(r'^python\n', '', sanitized_method).strip()
+                
                 logging.info(f"Sanitized Method Logic for Iteration {iteration + 1}:\n{sanitized_method}")
 
                 update_method_logic(sanitized_method, file_path)
 
                 with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
                     logging.info(f"Current method logic after iteration {iteration + 1}:\n{file.read()}")
+
+            # # Improve the method multiple times
+            # for iteration in range(improvements):
+            #     with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
+            #         current_method = file.read()
+                    
+            #     logging.info(f'Current method at {iteration} iteration:\n {current_method}')
+
+            #     last_result = instance.dynamic_method()
+            #     text_content = last_result.pop('text', None)
+            #     logging.info(f'Last result: {last_result}')
+
+            #     # Use the Gemini API instead of the OpenAI API
+            #     improved_method = generate_improved_method(current_method, last_result, iteration)
+            #     intermediate_logic_path = os.path.join(os.path.dirname(__file__), f'intermediate_logic_iteration_{iteration + 1}.txt')
+            #     with open(intermediate_logic_path, 'w') as file:
+            #         file.write(improved_method)
+
+            #     logging.info(f"Iteration {iteration + 1}: Improved Method Logic\n{improved_method}")
+
+            #     sanitized_method = re.sub(r'^```.*\n', '', improved_method).strip().strip('```').strip()
+            #     sanitized_method = re.sub(r'^python\n', '', sanitized_method).strip()
+            #     logging.info(f"Sanitized Method Logic for Iteration {iteration + 1}:\n{sanitized_method}")
+
+            #     update_method_logic(sanitized_method, file_path)
+
+            #     with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
+            #         logging.info(f"Current method logic after iteration {iteration + 1}:\n{file.read()}")
 
             final_result = instance.dynamic_method()
 
@@ -210,16 +248,16 @@ def method_logic(instance):
                         return None
 
                 additional_info = json.dumps(
-                    {k: v for k, v in final_result.items() if k != 'path'},
+                    {k: v for k, v in final_result.items() if k not in ['path', 'error'] and v is not None and v != ''},
                     indent=2,
                     default=default_json_serializer
                 )
 
-                context_info = generate_context_info(file_name=file_name, file_extension=file_extension, additional_info=additional_info)
+                context_info = generate_context_info(None, file_name=file_name, file_extension=file_extension, additional_info=additional_info)
                 final_result['text'] = context_info
 
             # Generate the PDF report
-            report = FileReport(final_result)
+            report = FileReport(clean_info_dict(final_result))
             report.generate_pdf(output_path)
 
             # Add contextual information to the report

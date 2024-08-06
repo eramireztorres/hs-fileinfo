@@ -65,7 +65,8 @@ setup(
         'configparser',
         'python-chess',
         'ebooklib',
-        'tesseract'
+        'svgpathtools',
+        'selenium'
     ],
     
     entry_points={

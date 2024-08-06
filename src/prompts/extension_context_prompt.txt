@@ -8,3 +8,5 @@ You are given information about a file and its extension. Your task is to provid
 File Name: {}
 File Extension: {}
 Additional Info: {}
+
+Answer with the additional contextual information only: 
