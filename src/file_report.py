@@ -117,7 +117,7 @@ class FileReport:
         self.add_subtitle("Contextual Information")
         self.add_text(context_info)
 
-    def generate_pdf(self, output_path, include_errors=True):
+    def generate_pdf(self, output_path, include_errors=False):
         """
         Generates a PDF report of the extracted information.
     
@@ -139,7 +139,8 @@ class FileReport:
     
         # Add other keys information
         for key, value in self.data.items():
-            if key == 'path':
+            
+            if 'path' in str(key).lower():
                 continue
             
             logging.info(f'Key: {key} Value {value}')

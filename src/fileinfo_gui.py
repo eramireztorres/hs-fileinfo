@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 import importlib
 import os
 import re
@@ -83,11 +83,11 @@ def read_file_info(instance):
         self.file_path_button.pack(pady=5)
 
         # Number of improvements
-        self.improvements_label = tk.Label(self, text="Number of Improvements (1-5):")
+        self.improvements_label = tk.Label(self, text="Number of Improvements:")
         self.improvements_label.pack(pady=5, anchor="w")
         self.improvements_entry = tk.Entry(self, width=10)
         self.improvements_entry.pack(pady=5)
-        self.improvements_entry.insert(0, "3")
+        self.improvements_entry.insert(0, "5")
 
         # Output path
         self.output_path_label = tk.Label(self, text="Output PDF Path:")
@@ -100,6 +100,12 @@ def read_file_info(instance):
         # Generate report button
         self.generate_button = tk.Button(self, text="Generate Report", command=self.generate_report)
         self.generate_button.pack(pady=20)
+
+        # Progress bar
+        self.progress = ttk.Progressbar(self, orient='horizontal', mode='determinate', length=400)
+        self.progress.pack(pady=10)
+        self.progress["value"] = 0
+        self.progress["maximum"] = 100
 
     def reset_method_logic(self):
         """Resets the method logic file to its original state."""
@@ -160,52 +166,15 @@ def read_file_info(instance):
         # Start a thread to handle the report generation
         threading.Thread(target=self.run_report_generation, args=(file_path, output_path, improvements)).start()
 
+    def update_progress(self, value):
+        """Updates the progress bar value."""
+        self.progress["value"] = value
+        self.update_idletasks()
+
     def run_report_generation(self, file_path, output_path, improvements):
         """Handles the actual report generation process."""
         # Disable the generate button while processing
         self.generate_button.config(state=tk.DISABLED)
-        
-        # try:
-        #     # Initialize the instance
-        #     instance = MyClass(file_path)
-        #     logging.info(f'File path: {file_path}')
-        
-        #     # Main loop integration
-        #     # Improve the method multiple times
-        #     for iteration in range(improvements):
-        #         with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
-        #             current_method = file.read()
-        
-        #         logging.info(f'Current method at {iteration} iteration:\n {current_method}')
-        
-        #         last_result = instance.dynamic_method()
-        #         text_content = last_result.pop('text', None)
-        #         logging.info(f'Last result: {last_result}')
-        
-        #         # Use the Gemini API instead of the OpenAI API
-        #         improved_method = generate_improved_method(current_method, last_result, iteration)
-        #         intermediate_logic_path = os.path.join(os.path.dirname(__file__), f'intermediate_logic_iteration_{iteration + 1}.txt')
-        #         with open(intermediate_logic_path, 'w') as file:
-        #             file.write(improved_method)
-        
-        #         logging.info(f"Iteration {iteration + 1}: Improved Method Logic\n{improved_method}")
-        
-        #         # Use MethodSanitizer to clean the improved method
-        #         sanitizer = MethodSanitizer(improved_method)
-        #         sanitized_method = sanitizer.sanitize()
-        
-        #         logging.info(f"Sanitized Method Logic for Iteration {iteration + 1}:\n{sanitized_method}")
-        
-        #         update_method_logic(sanitized_method, file_path)
-        
-        #         with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
-        #             logging.info(f"Current method logic after iteration {iteration + 1}:\n{file.read()}")
-        
-        #     final_result = instance.dynamic_method()
-        
-        #     logging.info(f"Final result: {final_result}")
-        # except Exception as e:
-        #     logging.error(f"An error occurred during processing: {e}")
 
         try:
             # Initialize the instance
@@ -246,6 +215,10 @@ def read_file_info(instance):
                 with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
                     logging.info(f"Current method logic after iteration {iteration + 1}:\n{file.read()}")
 
+                # Update progress bar
+                progress_value = ((iteration + 1) / improvements) * 100
+                self.update_progress(progress_value)
+
             final_result = instance.dynamic_method()
             
             logging.info(f"Final result: {final_result}")
@@ -278,15 +251,7 @@ def read_file_info(instance):
                     default=default_json_serializer
                 )
 
-
-                # additional_info = json.dumps(
-                #     {k: v for k, v in final_result.items() if 'error' not in str(k).lower() and v is not None and v != ''},
-                #     indent=2,
-                #     default=default_json_serializer
-                # )
-
                 context_info = generate_context_info(None, file_name=file_name, file_extension=file_extension, additional_info=additional_info)
-                # final_result['text'] = context_info
 
             # Generate the PDF report
             report = FileReport(clean_info_dict(final_result))
@@ -302,14 +267,19 @@ def read_file_info(instance):
 
             report.finalize_pdf(output_path)
             messagebox.showinfo("Success", f"PDF report generated successfully at {output_path}")
+            self.reset_method_logic()
+
         except Exception as e:
             logging.error(f"An error occurred: {e}")
             messagebox.showerror("Error", f"An error occurred during report generation: {e}")
+        
         finally:
             # Re-enable the generate button
             self.generate_button.config(state=tk.NORMAL)
             # Reset method logic
             self.reset_method_logic()
+            # Reset progress bar
+            self.update_progress(0)
 
 
 def truncate_value(value, max_length=100):
@@ -319,14 +289,12 @@ def truncate_value(value, max_length=100):
     return value
 
 
-
 def main():
     app = Application()
     app.mainloop()
 
 if __name__ == "__main__":
     main()
-
 
 
 # import tkinter as tk
@@ -338,9 +306,16 @@ if __name__ == "__main__":
 # import threading
 # import logging
 # import google.generativeai as genai
+# import sys
 
-# from src.hs import MyClass, update_method_logic, generate_improved_method, generate_context_info
-# from src.file_report import FileReport
+# # from src.hs import MyClass, update_method_logic, generate_improved_method
+# # from src.hs import generate_context_info, clean_info_dict, MethodSanitizer
+# # from src.file_report import FileReport
+
+# sys.path.append(os.path.dirname(__file__))
+# from hs import MyClass, update_method_logic, generate_improved_method
+# from hs import generate_context_info, clean_info_dict, MethodSanitizer
+# from file_report import FileReport
 
 # # Configure logging for debugging purposes
 # logging.basicConfig(
@@ -371,7 +346,7 @@ if __name__ == "__main__":
 
 #         # Store the original method logic
 #         self.original_method_logic = """
-# def method_logic(instance):
+# def read_file_info(instance):
 #     return {'path': instance.file_path}
 # """
 
@@ -488,30 +463,81 @@ if __name__ == "__main__":
 #         """Handles the actual report generation process."""
 #         # Disable the generate button while processing
 #         self.generate_button.config(state=tk.DISABLED)
+        
+#         # try:
+#         #     # Initialize the instance
+#         #     instance = MyClass(file_path)
+#         #     logging.info(f'File path: {file_path}')
+        
+#         #     # Main loop integration
+#         #     # Improve the method multiple times
+#         #     for iteration in range(improvements):
+#         #         with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
+#         #             current_method = file.read()
+        
+#         #         logging.info(f'Current method at {iteration} iteration:\n {current_method}')
+        
+#         #         last_result = instance.dynamic_method()
+#         #         text_content = last_result.pop('text', None)
+#         #         logging.info(f'Last result: {last_result}')
+        
+#         #         # Use the Gemini API instead of the OpenAI API
+#         #         improved_method = generate_improved_method(current_method, last_result, iteration)
+#         #         intermediate_logic_path = os.path.join(os.path.dirname(__file__), f'intermediate_logic_iteration_{iteration + 1}.txt')
+#         #         with open(intermediate_logic_path, 'w') as file:
+#         #             file.write(improved_method)
+        
+#         #         logging.info(f"Iteration {iteration + 1}: Improved Method Logic\n{improved_method}")
+        
+#         #         # Use MethodSanitizer to clean the improved method
+#         #         sanitizer = MethodSanitizer(improved_method)
+#         #         sanitized_method = sanitizer.sanitize()
+        
+#         #         logging.info(f"Sanitized Method Logic for Iteration {iteration + 1}:\n{sanitized_method}")
+        
+#         #         update_method_logic(sanitized_method, file_path)
+        
+#         #         with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
+#         #             logging.info(f"Current method logic after iteration {iteration + 1}:\n{file.read()}")
+        
+#         #     final_result = instance.dynamic_method()
+        
+#         #     logging.info(f"Final result: {final_result}")
+#         # except Exception as e:
+#         #     logging.error(f"An error occurred during processing: {e}")
 
 #         try:
 #             # Initialize the instance
 #             instance = MyClass(file_path)
 #             logging.info(f'File path: {file_path}')
-
+            
+#             # Main loop integration
 #             # Improve the method multiple times
 #             for iteration in range(improvements):
 #                 with open(os.path.join(os.path.dirname(__file__), 'method_logic.py'), 'r') as file:
 #                     current_method = file.read()
+                    
+#                 logging.info(f'Current method at {iteration} iteration:\n {current_method}')
 
 #                 last_result = instance.dynamic_method()
 #                 text_content = last_result.pop('text', None)
 #                 logging.info(f'Last result: {last_result}')
 
-#                 improved_method = generate_improved_method(openai_api_key, current_method, last_result, iteration)
+#                 # Use the Gemini API instead of the OpenAI API
+#                 improved_method = generate_improved_method(current_method, last_result, iteration)
 #                 intermediate_logic_path = os.path.join(os.path.dirname(__file__), f'intermediate_logic_iteration_{iteration + 1}.txt')
 #                 with open(intermediate_logic_path, 'w') as file:
 #                     file.write(improved_method)
 
 #                 logging.info(f"Iteration {iteration + 1}: Improved Method Logic\n{improved_method}")
 
+#                 # Use MethodSanitizer to clean the improved method
+#                 # sanitizer = MethodSanitizer(improved_method)
+#                 # sanitized_method = sanitizer.sanitize()
+                
 #                 sanitized_method = re.sub(r'^```.*\n', '', improved_method).strip().strip('```').strip()
 #                 sanitized_method = re.sub(r'^python\n', '', sanitized_method).strip()
+                
 #                 logging.info(f"Sanitized Method Logic for Iteration {iteration + 1}:\n{sanitized_method}")
 
 #                 update_method_logic(sanitized_method, file_path)
@@ -520,11 +546,13 @@ if __name__ == "__main__":
 #                     logging.info(f"Current method logic after iteration {iteration + 1}:\n{file.read()}")
 
 #             final_result = instance.dynamic_method()
+            
+#             logging.info(f"Final result: {final_result}")
 
 #             # Generate contextual information for the report
 #             context_info = None
 #             if text_content:
-#                 context_info = generate_context_info(openai_api_key, text_content)
+#                 context_info = generate_context_info(text_content=text_content)
 #                 final_result['text'] = text_content
 #             else:
 #                 file_extension = os.path.splitext(file_path)[1]
@@ -538,18 +566,29 @@ if __name__ == "__main__":
 #                     except Exception as e:
 #                         logging.warning(f"Skipping non-serializable object: {obj}. Error: {e}")
 #                         return None
-
+                    
 #                 additional_info = json.dumps(
-#                     {k: v for k, v in final_result.items() if k != 'path'},
+#                     {
+#                         k: truncate_value(v)  # Apply truncation
+#                         for k, v in final_result.items()
+#                         if 'error' not in str(k).lower() and v is not None and v != ''
+#                     },
 #                     indent=2,
 #                     default=default_json_serializer
 #                 )
 
-#                 context_info = generate_context_info(openai_api_key, file_name=file_name, file_extension=file_extension, additional_info=additional_info)
-#                 final_result['text'] = context_info
+
+#                 # additional_info = json.dumps(
+#                 #     {k: v for k, v in final_result.items() if 'error' not in str(k).lower() and v is not None and v != ''},
+#                 #     indent=2,
+#                 #     default=default_json_serializer
+#                 # )
+
+#                 context_info = generate_context_info(None, file_name=file_name, file_extension=file_extension, additional_info=additional_info)
+#                 # final_result['text'] = context_info
 
 #             # Generate the PDF report
-#             report = FileReport(final_result)
+#             report = FileReport(clean_info_dict(final_result))
 #             report.generate_pdf(output_path)
 
 #             # Add contextual information to the report
@@ -568,6 +607,16 @@ if __name__ == "__main__":
 #         finally:
 #             # Re-enable the generate button
 #             self.generate_button.config(state=tk.NORMAL)
+#             # Reset method logic
+#             self.reset_method_logic()
+
+
+# def truncate_value(value, max_length=100):
+#     """Truncate the value if it exceeds max_length."""
+#     if isinstance(value, str) and len(value) > max_length:
+#         return value[:max_length] + '...'
+#     return value
+
 
 
 # def main():

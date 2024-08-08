@@ -67,7 +67,8 @@ setup(
         'ebooklib',
         'svgpathtools',
         'selenium',
-        'html2text'
+        'html2text',
+        'bs4'
     ],
     
     entry_points={

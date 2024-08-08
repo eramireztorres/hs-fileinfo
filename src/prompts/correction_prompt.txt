@@ -7,7 +7,6 @@ Error:
 {error_details}
 
 Some Installed Packages you may use:
-- openai
 - fpdf2
 - pandas
 - matplotlib
@@ -40,7 +39,7 @@ Some Installed Packages you may use:
 - lxml
 - rarfile
 - python-magic
-- python-magic-bin	
+- python-magic-bin
 - py7zr
 - odfpy
 - epub
@@ -52,11 +51,98 @@ Some Installed Packages you may use:
 - ebooklib
 - svgpathtools
 - selenium
-
+- html2text
+- bs4
 
 Instructions:
 
-    Correct the method code using the available packages (imported within the corrected method) and/or Python kernel packages.
-Avoid any code line out of the corrected method.
-	The fix must either be to fix the error without using new external dependencies, or to remove the line that causes the error in the method.
-    Return only the corrected code without any additional text, comments, string markers, or quotes:
+1. Correct the method code using the available packages (imported within the corrected method) and/or Python standard packages.
+2. Ensure that all necessary imports are included within the method.
+3. Maintain as much of the original functionality as possible.
+4. Avoid any code line outside of the corrected method.
+5. The fix must either correct the error using existing or newly imported packages or remove the line that causes the error if it cannot be corrected.
+6. Return only the corrected code without any additional text, comments, string markers, or quotes.
+
+Common Error Types:
+- Missing Imports: Ensure all necessary packages are imported within the method.
+- Incorrect Package Usage: Verify correct usage of package functions and classes.
+- Syntax Errors: Correct any syntax issues.
+- Logical Errors: Adjust the logic to fix errors without changing the method's intent.
+- Unsupported Operations: Remove or replace unsupported operations.
+
+Examples:
+
+Example 1:
+Method code:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    try:
+        with MP3(self.file_path, ID3=mutagen.id3.ID3) as audio_file:
+            info['artist'] = audio_file.get('TPE1').text[0]
+            info['album'] = audio_file.get('TALB').text[0]
+            info['track_number'] = audio_file.get('TRCK').text[0]
+            info['title'] = audio_file.get('TIT2').text[0]
+            info['duration'] = audio_file.info.length
+    except Exception as e:
+        info['audio_error'] = str(e)
+    return info
+
+Error:
+
+name 'mutagen' is not defined
+
+Corrected Code:
+
+def read_file_info(self):
+    info = {'path': self.file_path}
+    from mutagen.mp3 import MP3
+    import mutagen
+    try:
+        with MP3(self.file_path, ID3=mutagen.id3.ID3) as audio_file:
+            info['artist'] = audio_file.get('TPE1').text[0]
+            info['album'] = audio_file.get('TALB').text[0]
+            info['track_number'] = audio_file.get('TRCK').text[0]
+            info['title'] = audio_file.get('TIT2').text[0]
+            info['duration'] = audio_file.info.length
+    except Exception as e:
+        info['audio_error'] = str(e)
+    return info
+
+Example 2:
+Method code:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import pandas as pd
+    try:
+        df = pd.read_csv(self.file_path)
+        info['row_count'] = len(df)
+        info['column_count'] = len(df.columns)
+    except Exception as e:
+        info['csv_error'] = str(e)
+    return info
+
+Error:
+
+pandas.errors.EmptyDataError: No columns to parse from file
+
+
+Corrected Code:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import pandas as pd
+    try:
+        df = pd.read_csv(self.file_path)
+        if df.empty:
+            info['row_count'] = 0
+            info['column_count'] = 0
+        else:
+            info['row_count'] = len(df)
+            info['column_count'] = len(df.columns)
+    except pd.errors.EmptyDataError:
+        info['csv_error'] = 'No columns to parse from file'
+    except Exception as e:
+        info['csv_error'] = str(e)
+    return info
+
+
+

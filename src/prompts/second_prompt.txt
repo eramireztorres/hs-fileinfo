@@ -41,7 +41,6 @@ The improved method must:
     - Return only the executable code for the new method without any comments, markdown formatting, or additional text.
 
 Some Installed Packages you may use:
-- openai
 - fpdf2
 - pandas
 - matplotlib
@@ -87,6 +86,7 @@ Some Installed Packages you may use:
 - svgpathtools
 - selenium
 - html2text
+- bs4
 
 Examples:
 

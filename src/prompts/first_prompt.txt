@@ -42,7 +42,6 @@ The improved method must:
 
 
 Some Installed Packages you may use:
-- openai
 - fpdf2
 - pandas
 - matplotlib
@@ -88,6 +87,7 @@ Some Installed Packages you may use:
 - svgpathtools
 - selenium
 - html2text
+- bs4
 
 Examples:
 
@@ -478,4 +478,27 @@ Examples:
               info['svg_error'] = str(e)
           return info
        
+11. **EPUB File (epub):**
+    - Current Method:
+       
+      def read_file_info(self):
+          return {'path': self.file_path}
+       
 
+    - Last Result:
+       json
+      {'path': 'path/to/file.epub'}
+       
+
+    - Improved Method:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import ebooklib
+    from ebooklib import epub
+    try:
+        book = epub.read_epub(self.file_path)
+        info['title'] = book.get_metadata('DC', 'title')
+        info['author'] = book.get_metadata('DC', 'creator')
+    except Exception as e:
+        info['epub_error'] = str(e)
+    return info

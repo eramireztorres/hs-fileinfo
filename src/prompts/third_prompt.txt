@@ -42,7 +42,6 @@ The improved method must:
 
 
 ### Installed Packages you may use:
-- openai
 - fpdf2
 - pandas
 - matplotlib
@@ -88,6 +87,7 @@ The improved method must:
 - svgpathtools
 - selenium
 - html2text
+- bs4
 
 ### Examples:
 
@@ -486,3 +486,60 @@ def read_file_info(self):
     except Exception as e:
         info['xml_error'] = str(e)
     return info
+
+8. **EPUB File (epub)**:
+   - **Current Method**:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import ebooklib
+    from ebooklib import epub
+    try:
+        book = epub.read_epub(self.file_path)
+        info['title'] = book.get_metadata('DC', 'title')
+        info['author'] = book.get_metadata('DC', 'creator')
+    except Exception as e:
+        info['epub_error'] = str(e)
+    return info
+
+
+
+   - **Last Result**:
+{'path': 'path/to/file.epub', 'title': ['Example Title'], 'author': ['Author Name']}
+
+
+
+   - **Improved Method**:
+
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import ebooklib
+    from ebooklib import epub
+    import bs4
+    try:
+        book = epub.read_epub(self.file_path)
+        info['title'] = book.get_metadata('DC', 'title')
+        info['author'] = book.get_metadata('DC', 'creator')
+
+        # Additional processing
+        try:
+            toc = book.get_items_of_type(ebooklib.ITEM_NAVIGATION)
+            for item in toc:
+                soup = bs4.BeautifulSoup(item.content, 'html.parser')
+                info['toc'] = [li.get_text() for li in soup.find_all('li')]
+        except Exception as e:
+            info['toc_error'] = str(e)
+
+        try:
+            content = ''
+            for item in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
+                soup = bs4.BeautifulSoup(item.content, 'html.parser')
+                content += soup.get_text()
+            info['word_count'] = len(content.split())
+            info['char_count'] = len(content)
+        except Exception as e:
+            info['content_error'] = str(e)
+
+    except Exception as e:
+        info['epub_error'] = str(e)
+    return info
+
