@@ -7,16 +7,41 @@ Last Result:
 
 === SEPARATOR ===
 
-Objective:
+**Objective**:
+
 Your task is to improve this method to extract as much additional information as possible in text form from the file specified by the path. The improved method should handle the specific file type provided in the last result and extract relevant additional information for that type only. The original path and any previously extracted information must always be included in the returned dictionary.
 
 The improved method must:
-- Ensure the initial test (returning the path) continues to work.
-- Try to import any necessary modules within a try block and proceed only if the import is successful.
-- Return only the executable code for the new method without any comments, markdown formatting, or additional text.
-- Focus exclusively on improving the additional information extraction for the specific file type provided in the last result. Do not generalize to other file types.
 
-Some Installed Packages you may use:
+1. Preserve Existing Information:
+    - Ensure that no existing information extraction is removed from the current method.
+    - Build upon the current implementation to add new features or information.
+
+2. Enhance with Additional Processing:
+    - Feel free to introduce new Python processing logic for the results already obtained by the current method.
+    - The improved method should make logical extensions to extract or process data meaningfully.
+
+3. Focus on Specific File Type:
+    - Only improve the information extraction for the file type provided in the path of the Last Result.
+    - Do not generalize to other file types.
+
+4. Robust Error Handling:
+    - Follow a try/except scheme for each new piece of information you are extracting.
+    - Log specific errors related to each extraction to the info dictionary without stopping the execution.
+
+5. Mandatory Module Imports:
+    - All modules and packages used in the method must be imported within the method itself.
+    - Ensure that every package used has a corresponding import statement at the beginning of the method.
+
+6. Error Correction:
+    - If the Last Result dictionary contains any key with the substring 'error' in it, the improved method should attempt to correct the error.
+    - This includes ensuring the correct import and use of necessary packages.
+
+7. Code Execution:
+    - Return only the executable code for the new method without any comments, markdown formatting, or additional text.
+
+
+### Installed Packages you may use:
 - openai
 - fpdf2
 - pandas
@@ -50,7 +75,7 @@ Some Installed Packages you may use:
 - lxml
 - rarfile
 - python-magic
-- python-magic-bin	
+- python-magic-bin
 - py7zr
 - odfpy
 - epub
@@ -62,4 +87,402 @@ Some Installed Packages you may use:
 - ebooklib
 - svgpathtools
 - selenium
+- html2text
 
+### Examples:
+
+1. **Text File (txt)**:
+   - **Current Method**:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         try:
+             with open(self.file_path, 'r') as file:
+                 content = file.read()
+                 info['line_count'] = len(content.splitlines())
+                 info['word_count'] = len(content.split())
+                 info['char_count'] = len(content)
+         except Exception as e:
+             info['error'] = str(e)
+         return info
+      
+
+   - **Last Result**:
+      
+     {'path': 'path/to/file.txt', 'line_count': 100, 'word_count': 500, 'char_count': 3000}
+      
+
+   - **Improved Method**:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    try:
+        with open(self.file_path, 'r') as file:
+            content = file.read()
+            info['line_count'] = len(content.splitlines())
+            info['word_count'] = len(content.split())
+            info['char_count'] = len(content)
+            
+            # Additional processing
+            try:
+                word_frequencies = {}
+                for word in content.split():
+                    word_frequencies[word] = word_frequencies.get(word, 0) + 1
+                info['most_common_word'] = max(word_frequencies, key=word_frequencies.get)
+            except Exception as e:
+                info['word_frequency_error'] = str(e)
+
+            try:
+                average_sentence_length = sum(len(sentence.split()) for sentence in content.split('.')) / len(content.split('.'))
+                info['average_sentence_length'] = average_sentence_length
+            except Exception as e:
+                info['average_sentence_length_error'] = str(e)
+
+    except Exception as e:
+        info['file_error'] = str(e)
+    return info
+
+
+2. **CSV File (csv)**:
+   - **Current Method**:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import pandas as pd
+         try:
+             df = pd.read_csv(self.file_path)
+             info['row_count'] = len(df)
+             info['column_count'] = len(df.columns)
+         except Exception as e:
+             info['csv_error'] = str(e)
+         return info
+      
+
+   - **Last Result**:
+      
+     {'path': 'path/to/file.csv', 'row_count': 1000, 'column_count': 10}
+      
+
+   - **Improved Method**:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import pandas as pd
+    try:
+        df = pd.read_csv(self.file_path)
+        info['row_count'] = len(df)
+        info['column_count'] = len(df.columns)
+        
+        # Additional processing
+        try:
+            # Calculate correlation matrix
+            correlation_matrix = df.corr().to_dict()
+            info['correlation_matrix'] = correlation_matrix
+        except Exception as e:
+            info['correlation_error'] = str(e)
+
+        try:
+            # Find the column with the highest variance
+            column_variances = df.var()
+            highest_variance_column = column_variances.idxmax()
+            info['highest_variance_column'] = highest_variance_column
+            info['highest_variance_value'] = column_variances[highest_variance_column]
+        except Exception as e:
+            info['variance_error'] = str(e)
+
+    except Exception as e:
+        info['csv_error'] = str(e)
+    return info
+
+
+3. **Audio File (wav)**:
+   - **Current Method**:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import wave
+         try:
+             with wave.open(self.file_path, 'rb') as wav_file:
+                 info['nchannels'] = wav_file.getnchannels()
+                 info['framerate'] = wav_file.getframerate()
+                 info['nframes'] = wav_file.getnframes()
+         except Exception as e:
+             info['audio_error'] = str(e)
+         return info
+      
+
+   - **Last Result**:
+      
+     {'path': 'path/to/file.wav', 'nchannels': 2, 'framerate': 44100, 'nframes': 100000}
+      
+
+   - **Improved Method**:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import wave
+    import numpy as np
+    import librosa
+    try:
+        with wave.open(self.file_path, 'rb') as wav_file:
+            info['nchannels'] = wav_file.getnchannels()
+            info['framerate'] = wav_file.getframerate()
+            info['nframes'] = wav_file.getnframes()
+
+            # Additional processing
+            try:
+                # Extract a segment of the audio and calculate the RMS energy
+                frames = wav_file.readframes(info['nframes'])
+                audio_data = np.frombuffer(frames, dtype=np.int16)
+                rms_energy = np.sqrt(np.mean(audio_data**2))
+                info['rms_energy'] = rms_energy
+            except Exception as e:
+                info['rms_energy_error'] = str(e)
+
+            try:
+                # Calculate tempo (beats per minute)
+                audio, sr = librosa.load(self.file_path)
+                tempo, _ = librosa.beat.beat_track(y=audio, sr=sr)
+                info['tempo'] = tempo
+            except Exception as e:
+                info['tempo_error'] = str(e)
+
+    except Exception as e:
+        info['audio_error'] = str(e)
+    return info
+
+
+4. **Excel File (xlsx)**:
+   - **Current Method**:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import openpyxl
+         try:
+             workbook = openpyxl.load_workbook(self.file_path, read_only=True)
+             info['sheet_count'] = len(workbook.sheetnames)
+             info['sheets'] = workbook.sheetnames
+         except Exception as e:
+             info['excel_error'] = str(e)
+         return info
+      
+
+   - **Last Result**:
+      
+     {'path': 'path/to/file.xlsx', 'sheet_count': 3, 'sheets': ['Sheet1', 'Sheet2', 'Sheet3']}
+      
+
+   - **Improved Method**:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import openpyxl
+    try:
+        workbook = openpyxl.load_workbook(self.file_path, read_only=True)
+        info['sheet_count'] = len(workbook.sheetnames)
+        info['sheets'] = workbook.sheetnames
+
+        # Process the first sheet
+        try:
+            if 'Sheet1' in info['sheets']:
+                ws = workbook['Sheet1']
+                # Read data from 'Sheet1' and calculate some statistics
+                sheet1_data = []
+                for row in ws.iter_rows(min_row=1, max_row=ws.max_row, max_col=ws.max_column, values_only=True):
+                    sheet1_data.append(row)
+                info['Sheet1_summary'] = {
+                    'rows': len(sheet1_data),
+                    'columns': len(sheet1_data[0]) if sheet1_data else 0,
+                    'first_row': sheet1_data[0] if sheet1_data else None,
+                    'first_column_values': [row[0] for row in sheet1_data] if sheet1_data else None,
+                }
+        except Exception as e:
+            info['Sheet1_summary_error'] = str(e)
+
+    except Exception as e:
+        info['excel_error'] = str(e)
+    return info
+
+
+5. **JSON File (json)**:
+   - **Current Method**:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import json
+         try:
+             with open(self.file_path, 'r') as file:
+                 data = json.load(file)
+                 info['key_count'] = len(data)
+         except Exception as e:
+             info['json_error'] = str(e)
+         return info
+      
+
+   - **Last Result**:
+      
+     {'path': 'path/to/file.json', 'key_count': 5}
+      
+
+   - **Improved Method**:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import json
+    try:
+        with open(self.file_path, 'r') as file:
+            data = json.load(file)
+            info['key_count'] = len(data)
+
+            # Additional processing
+            try:
+                # Calculate the depth of nested structures
+                def calculate_depth(d, level=1):
+                    if isinstance(d, dict):
+                        return max(calculate_depth(v, level + 1) for v in d.values()) if d else level
+                    elif isinstance(d, list):
+                        return max(calculate_depth(i, level) for i in d) if d else level
+                    else:
+                        return level
+
+                info['max_depth'] = calculate_depth(data)
+            except Exception as e:
+                info['depth_error'] = str(e)
+
+            try:
+                # Count unique data types in the JSON
+                def count_types(d, types=set()):
+                    if isinstance(d, dict):
+                        for v in d.values():
+                            count_types(v, types)
+                    elif isinstance(d, list):
+                        for i in d:
+                            count_types(i, types)
+                    else:
+                        types.add(type(d).__name__)
+                    return types
+
+                info['unique_types'] = list(count_types(data))
+            except Exception as e:
+                info['types_error'] = str(e)
+
+    except Exception as e:
+        info['json_error'] = str(e)
+    return info
+
+
+6. **ZIP File (zip)**:
+   - **Current Method**:
+      
+     def read_file_info(self):
+         info = {'path': self.file_path}
+         import zipfile
+         try:
+             with zipfile.ZipFile(self.file_path, 'r') as zip_file:
+                 info['file_count'] = len(zip_file.namelist())
+                 info['file_list'] = zip_file.namelist()
+         except Exception as e:
+             info['zip_error'] = str(e)
+         return info
+      
+
+   - **Last Result**:
+      
+     {'path': 'path/to/file.zip', 'file_count': 5, 'file_list': ['file1.txt', 'file2.txt', 'image.jpg']}
+      
+
+   - **Improved Method**:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import zipfile
+    from PIL import Image
+    import os
+
+    try:
+        with zipfile.ZipFile(self.file_path, 'r') as zip_file:
+            info['file_count'] = len(zip_file.namelist())
+            info['file_list'] = zip_file.namelist()
+
+            # Save the image to a different path
+            try:
+                image_path = None
+                if 'image.jpg' in info['file_list']:
+                    with zip_file.open('image.jpg') as img_file:
+                        img = Image.open(img_file)
+                        image_path = os.path.join('saved_images', 'image.jpg')
+                        os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                        img.save(image_path)
+                        info['saved_image_path'] = image_path
+            except Exception as e:
+                info['image_save_error'] = str(e)
+
+            # Extract info from text files
+            try:
+                text_summary = {}
+                for text_file in ['file1.txt', 'file2.txt']:
+                    if text_file in info['file_list']:
+                        with zip_file.open(text_file) as file:
+                            content = file.read().decode('utf-8')
+                            text_summary[text_file] = {
+                                'line_count': len(content.splitlines()),
+                                'word_count': len(content.split()),
+                                'char_count': len(content),
+                                'first_100_chars': content[:100]
+                            }
+                info['text_summary'] = text_summary
+            except Exception as e:
+                info['text_summary_error'] = str(e)
+
+    except Exception as e:
+        info['zip_error'] = str(e)
+    return info
+
+7. **XML File (xml)**:
+   - **Current Method**:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import xml.etree.ElementTree as ET
+    try:
+        tree = ET.parse(self.file_path)
+        root = tree.getroot()
+        info['root_tag'] = root.tag
+        info['child_count'] = len(root)
+    except Exception as e:
+        info['xml_error'] = str(e)
+    return info
+
+
+   - **Last Result**:
+{'path': 'path/to/file.xml', 'root_tag': 'data', 'child_count': 5}
+
+
+   - **Improved Method**:
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import xml.etree.ElementTree as ET
+    try:
+        tree = ET.parse(self.file_path)
+        root = tree.getroot()
+        info['root_tag'] = root.tag
+        info['child_count'] = len(root)
+
+        # Extract information from a specific tag
+        try:
+            records = root.findall('record')
+            record_data = []
+            for record in records:
+                record_info = {}
+                for child in record:
+                    record_info[child.tag] = child.text
+                record_data.append(record_info)
+            info['record_data'] = record_data
+
+            # Further processing: calculate average length of text in a specific field
+            try:
+                if record_data:
+                    average_name_length = sum(len(record.get('name', '')) for record in record_data) / len(record_data)
+                    info['average_name_length'] = average_name_length
+            except Exception as e:
+                info['average_name_length_error'] = str(e)
+                
+        except Exception as e:
+            info['record_data_error'] = str(e)
+
+    except Exception as e:
+        info['xml_error'] = str(e)
+    return info

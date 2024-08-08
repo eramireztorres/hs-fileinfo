@@ -66,7 +66,8 @@ setup(
         'python-chess',
         'ebooklib',
         'svgpathtools',
-        'selenium'
+        'selenium',
+        'html2text'
     ],
     
     entry_points={

@@ -13,11 +13,32 @@ Your task is to improve this method to add graphic information related to the fi
 
 The improved method must:
 
-- Ensure the initial test (returning the path) continues to work.
-- Implement robust error handling using try/except blocks to capture and report errors without halting execution.
-- Create a subdirectory named "plots" in the current directory to save the generated plots.
-- Return only the executable code for the new method without any comments, markdown formatting, or additional text.
-- Focus exclusively on improving the graphic information extraction for the specific file type provided in the last result. Do not generalize to other file types.
+1. Preserve Existing Information:
+    - Ensure that no existing information extraction is removed from the current method.
+    - Build upon the current implementation to add new features or information.
+
+2. Enhance with Additional Processing:
+    - Feel free to introduce new Python processing logic for the results already obtained by the current method.
+    - The improved method should make logical extensions to extract or process data meaningfully.
+
+3. Focus on Specific File Type:
+    - Only improve the information extraction for the file type provided in the path of the Last Result.
+    - Do not generalize to other file types.
+
+4. Robust Error Handling:
+    - Follow a try/except scheme for each new piece of information you are extracting.
+    - Log specific errors related to each extraction to the info dictionary without stopping the execution.
+
+5. Mandatory Module Imports:
+    - All modules and packages used in the method must be imported within the method itself.
+    - Ensure that every package used has a corresponding import statement at the beginning of the method.
+
+6. Error Correction:
+    - If the Last Result dictionary contains any key with the substring 'error' in it, the improved method should attempt to correct the error.
+    - This includes ensuring the correct import and use of necessary packages.
+
+7. Code Execution:
+    - Return only the executable code for the new method without any comments, markdown formatting, or additional text.
 
 Some Installed Packages you may use:
 - openai
@@ -65,6 +86,7 @@ Some Installed Packages you may use:
 - ebooklib
 - svgpathtools
 - selenium
+- html2text
 
 Examples:
 

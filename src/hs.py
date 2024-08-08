@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 import sys
 import re
+import inspect
 
 import pkg_resources
 
@@ -16,9 +17,12 @@ def load_prompt_file(filename):
     resource_path = f'prompts/{filename}'  # Do not use os.path.join() here
     return pkg_resources.resource_string(resource_package, resource_path).decode('utf-8')
 
-from tests import test_method_logic
+# from tests import test_method_logic
+# from src.gemini_api import GeminiAPI
 
-from src.gemini_api import GeminiAPI
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tests'))
+import test_method_logic
+from gemini_api import GeminiAPI
 
 # Retrieve API key and project ID from environment variables
 gemini_api_key = os.getenv('GEMINI_API_KEY')
@@ -44,34 +48,186 @@ class LlmAnswerGenerator:
     def get_response(self, prompt):
         return self.get_answer(prompt)
 
+# class MyClass:
+#     def __init__(self, file_path):
+#         self.file_path = file_path
+
+#     def dynamic_method(self, retries=3, delay_duration=5):
+#         sys.path.append(os.path.dirname(__file__))
+#         module_name = 'method_logic'
+#         method_name = 'method_logic'
+
+#         # Properly update and reload the module
+#         for attempt in range(retries):
+#             try:
+#                 # Reload the module each time to ensure it has the latest version
+#                 module = importlib.import_module(module_name)
+#                 importlib.reload(module)
+
+#                 # Fetch the updated method
+#                 method = getattr(module, method_name)
+
+#                 # Execute the method
+#                 result = method(self)
+
+#                 # Validate output
+#                 self.validate_output(result)
+
+#                 return result
+
+#             except Exception as e:
+#                 logging.error(f"Error in method execution: {e}")
+                
+#                 logging.info(f"Delaying request by {delay_duration} seconds due to fix attempt {attempt}")
+#                 time.sleep(delay_duration)
+
+#                 corrected_code = self.correct_method_code(method_name, method, e)
+#                 self.apply_corrected_method(module_name, method_name, corrected_code)
+
+#         raise RuntimeError("All correction attempts failed.")
+
+#     def validate_output(self, result):
+#         if 'path' not in result:
+#             raise ValueError("path key not present. Output validation failed.")
+
+#     def correct_method_code(self, method_name, method, error):
+#         current_code = self.get_method_code(method_name, method)
+#         prompt_template = self.read_prompt_template()
+#         prompt = prompt_template.format(current_code=current_code, error_details=str(error))
+#         generator = LlmAnswerGenerator()
+#         corrected_code = generator.get_response(prompt)
+#         return corrected_code
+
+#     def apply_corrected_method(self, module_name, method_name, corrected_code):
+#         method_logic_path = os.path.join(os.path.dirname(__file__), f'{module_name}.py')
+#         with open(method_logic_path, 'w') as file:
+#             file.write(corrected_code)
+#         importlib.reload(importlib.import_module(module_name))
+
+#     def get_method_code(self, method_name, method):
+#         import inspect
+#         return inspect.getsource(method)
+
+#     def read_prompt_template(self):
+#         return load_prompt_file("correction_prompt.txt")
+
+
+# class MethodSanitizer:
+#     def __init__(self, method_code):
+#         self.method_code = method_code
+
+#     def sanitize(self):
+#         # Remove unwanted code block markers
+#         sanitized_code = re.sub(r'^```.*\n', '', self.method_code).strip().strip('```').strip()
+#         # Remove any specific language indicators
+#         sanitized_code = re.sub(r'^python\n', '', sanitized_code).strip()
+
+#         # Remove try-except blocks if they exist
+#         sanitized_code = self.remove_try_except_blocks(sanitized_code)
+
+#         return sanitized_code
+
+#     def remove_try_except_blocks(self, code):
+#         # Use a regex pattern to identify try-except blocks and remove them
+#         try_except_pattern = re.compile(r"try\s*:\s*([\s\S]*?)\s*except\s+\w+\s+as\s+\w+:\s*([\s\S]*?)\s*return\s+[\s\S]+", re.MULTILINE)
+#         return try_except_pattern.sub(r'\1', code)
+
+
+# def update_method_logic(new_code, file_path):
+#     method_logic_path = os.path.join(os.path.dirname(__file__), 'method_logic.py')
+
+#     with open(method_logic_path, 'r') as file:
+#         current_code = file.read()
+
+#     with open(method_logic_path, 'w') as file:
+#         file.write(new_code)
+
+#     instance = MyClass(file_path=file_path)
+
+#     test_passed = False
+#     try:
+#         importlib.reload(test_method_logic)
+#         test_passed = test_method_logic.test_method_logic(instance)
+#     except Exception as e:
+#         logging.error(f"Test raised an error: {e}")
+#         test_passed = False
+
+#     if test_passed:
+#         logging.info("Tests passed. Keeping the new method logic.")
+#     else:
+#         logging.info("Tests failed. Reverting to the previous method logic.")
+#         with open(method_logic_path, 'w') as file:
+#             file.write(current_code)
 
 class MyClass:
     def __init__(self, file_path):
         self.file_path = file_path
+        
 
-    def dynamic_method(self, retries=10, delay_duration=5):
-        module_name = 'src.method_logic'
-        method_name = 'method_logic'
-        module = importlib.import_module(module_name)
-        importlib.reload(module)
-        method = getattr(module, method_name)
+    def dynamic_method(self, retries=3, delay_duration=5):
+        sys.path.append(os.path.dirname(__file__))
+        module_name = 'method_logic'
+        method_name = 'read_file_info'
 
         for attempt in range(retries):
             try:
-                result = method(self)
-                self.validate_output(result)
-                return result
-            except Exception as e:
-                logging.error(f"Error in method execution: {e}")
+                # Invalidate caches and force reload the module
+                importlib.invalidate_caches()
+                if module_name in sys.modules:
+                    del sys.modules[module_name]
                 
-                logging.info(f"Delaying request by {delay_duration} seconds due to fix attempt {attempt}")
-                time.sleep(delay_duration)
-                
-                corrected_code = self.correct_method_code(method_name, method, e)
-                self.apply_corrected_method(module_name, method_name, corrected_code)
+                module = importlib.import_module(module_name)
+                importlib.reload(module)
                 method = getattr(module, method_name)
 
+                # Debugging: Print out the method code
+                method_code = inspect.getsource(method)
+                logging.info(f"Method code at attempt {attempt}:\n{method_code}")
+
+                # Execute the method
+                result = method(self)
+                logging.info(f"Result of method execution at attempt {attempt}:\n{result}")
+
+                # Validate output
+                self.validate_output(result)
+
+                return result
+
+            except Exception as e:
+                logging.error(f"Error in method execution: {e}")
+
+                logging.info(f"Delaying request by {delay_duration} seconds due to fix attempt {attempt}")
+                time.sleep(delay_duration)
+
+                corrected_code = self.correct_method_code(method_name, method, e)
+                self.apply_corrected_method(module_name, method_name, corrected_code)
+
         raise RuntimeError("All correction attempts failed.")
+
+    # def dynamic_method(self, retries=3, delay_duration=5):
+    #     sys.path.append(os.path.dirname(__file__))
+    #     module_name = 'method_logic'
+    #     method_name = 'method_logic'
+    #     module = importlib.import_module(module_name)
+    #     importlib.reload(module)
+    #     method = getattr(module, method_name)
+
+    #     for attempt in range(retries):
+    #         try:
+    #             result = method(self)
+    #             self.validate_output(result)
+    #             return result
+    #         except Exception as e:
+    #             logging.error(f"Error in method execution: {e}")
+                
+    #             logging.info(f"Delaying request by {delay_duration} seconds due to fix attempt {attempt}")
+    #             time.sleep(delay_duration)
+                
+    #             corrected_code = self.correct_method_code(method_name, method, e)
+    #             self.apply_corrected_method(module_name, method_name, corrected_code)
+    #             method = getattr(module, method_name)
+
+    #     raise RuntimeError("All correction attempts failed.")
 
     def validate_output(self, result):
         if 'path' not in result:
@@ -90,7 +246,7 @@ class MyClass:
         corrected_code = generator.get_response(prompt)
         
         
-        logging.info(f"Corrected code:\n{corrected_code}")
+        # logging.info(f"Corrected code:\n{corrected_code}")
         
         return corrected_code
 
@@ -224,14 +380,15 @@ def generate_improved_method(current_method, last_result, iteration, delay_betwe
 
 
 def generate_context_info(text_content, file_name="", file_extension="", additional_info=""):
-    context_prompt = load_prompt_file("context_prompt.txt")
-    
+        
     if text_content:
+        context_prompt = load_prompt_file("context_prompt.txt")
         prompt = context_prompt.format(text_content[:1000])
     else:
-        prompt = f"File name: {file_name}\nFile extension: {file_extension}\nAdditional info: {additional_info}"
-    
-    logging.info(f"Context Prompt being sent to Gemini model:\n{prompt}")
+        extension_context_prompt = load_prompt_file("extension_context_prompt.txt")
+        prompt = extension_context_prompt.format(file_name, file_extension, additional_info)
+   
+    # logging.info(f"Context Prompt being sent to Gemini model:\n{prompt}")
 
     generator = LlmAnswerGenerator()
     context_info = generator.get_response(prompt)
