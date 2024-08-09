@@ -1,6 +1,18 @@
 # hs-fileinfo
 The Hot-Swapping Fileinfo App is a Python-based tool that extracts detailed information from various file types. Utilizing the Gemini model, the app dynamically improves its extraction methods to provide comprehensive data analysis and visualization for supported file formats, including images, documents, audio, and programming files.
 
+## What You Can Do
+
+With the Hot-Swapping Fileinfo App, you can:
+
+    Analyze Various File Types: Extract metadata and content from a wide range of file formats such as images (JPG, PNG, SVG), documents (PDF, DOCX, XLSX), audio files (MP3, WAV), and more.
+    Dynamic Method Improvement: The app iteratively improves its methods for extracting file information, adapting based on the file content.
+    Custom Report Generation: Generate detailed PDF reports summarizing the extracted information, complete with contextual insights.
+
+## Tips for Use
+
+    If the initial extraction doesn't yield the desired result, you can try running the report generation process multiple times increasing the number of improvements. The app will continue refining its methods with each improvement, potentially leading to better results.
+
 ## Prerequisites
 
 - Python 3.8 or higher
@@ -43,3 +55,6 @@ The Hot-Swapping Fileinfo App is a Python-based tool that extracts detailed info
     ```bash
     hs_fileinfo
     ```
+    
+## License
+Hot-Swapping Fileinfo is licensed under the MIT License.
