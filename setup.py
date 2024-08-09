@@ -13,16 +13,7 @@ setup(
         '': ['**/*.txt', 'icons/*.ico'],  # Include all .txt files and .ico files in the specified directories
     },
     install_requires=[
-        # Gemini API and Google Cloud dependencies
-        # 'google-ai-generativelanguage==0.4.0',
-        # 'google-generativeai==0.3.2',
-        # 'google-api-core>=2.15.0',
-        # 'google-api-python-client>=2.113.0',
-        # 'google-auth>=2.26.1',
-        # 'google-auth-httplib2>=0.2.0',
-        # 'googleapis-common-protos>=1.62.0',
-        'google-generativeai',
-        
+        'google-generativeai',        
         'fpdf2',
         'pandas',
         'matplotlib==3.8.2',

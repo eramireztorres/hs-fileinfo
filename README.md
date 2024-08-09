@@ -39,3 +39,7 @@ The Hot-Swapping Fileinfo App is a Python-based tool that extracts detailed info
     setx GEMINI_PROJECT_ID your-project-id
     ```
 
+5. **Run the app:**
+    ```bash
+    hs_fileinfo
+    ```
