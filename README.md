@@ -23,7 +23,7 @@ The Hot-Swapping Fileinfo App is a Python-based tool that extracts detailed info
 3. **Install the required packages:**
     Run the following command to install dependencies:
     ```bash
-    python setup.py install
+    pip install .
     ```
     
 4. **Set up your Google Cloud API key and Project ID as environment variables:**
