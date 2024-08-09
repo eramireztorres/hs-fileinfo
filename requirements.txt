@@ -57,7 +57,6 @@ moviepy==2.0.0.dev2
 msgpack==1.0.8
 multivolumefile==0.2.3
 mutagen==1.47.0
-mysqlclient==2.2.4
 nltk==3.8.1
 numba==0.60.0
 numpy==1.25.2
@@ -127,7 +126,6 @@ typing_extensions==4.12.2
 tzdata==2024.1
 uritemplate==4.1.1
 urllib3==2.2.2
-Wave==0.1.0
 webencodings==0.5.1
 websocket-client==1.8.0
 wordcloud==1.9.3
