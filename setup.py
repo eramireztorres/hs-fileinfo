@@ -25,7 +25,6 @@ install_requires=[
     'nltk==3.8.1',
     'wordcloud==1.9.3',
     'pytesseract==0.3.10',
-    'numpy==2.0.1',
     'scipy==1.14.0',
     'librosa==0.10.2.post1',
     'PyPDF2==3.0.1',
