@@ -148,6 +148,12 @@ class FileReport:
             if 'error' in key and not include_errors:
                 # Skip the error key if include_errors is False
                 continue
+            
+            try:
+                if value == '':
+                    continue
+            except:
+                pass
     
             if isinstance(value, str) and self.is_valid_text(value) and not os.path.isfile(value):
                 self.add_key_value(key.replace('_', ' ').title(), value)
