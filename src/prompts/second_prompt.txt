@@ -707,4 +707,80 @@ Examples:
 
          return info
       
+8. **SVG File (svg):**
+    - Current Method:
+       
+      def read_file_info(self):
+          return {'path': self.file_path}
+       
+
+    - Last Result:
+       json
+      {'path': 'path/to/file.svg'}
+       
+
+    - Improved Method:
+       
+def read_file_info(self):
+    info = {'path': self.file_path}
+    import cairosvg
+    from PIL import Image
+    import os
+
+    # Attempt to extract SVG information using ElementTree
+    try:
+        import xml.etree.ElementTree as ET
+        tree = ET.parse(self.file_path)
+        root = tree.getroot()
+        try:
+            info['svg_tag'] = root.tag
+        except Exception as e:
+            info['svg_tag_error'] = str(e)
+        try:
+            info['width'] = root.attrib.get('width', 'unknown')
+        except Exception as e:
+            info['width_error'] = str(e)
+        try:
+            info['height'] = root.attrib.get('height', 'unknown')
+        except Exception as e:
+            info['height_error'] = str(e)
+    except Exception as e:
+        info['svg_parse_error'] = str(e)
+        return info
+
+    # Create plots directory if it doesn't exist
+    plots_dir = 'plots'
+    os.makedirs(plots_dir, exist_ok=True)
+
+    # Convert SVG to PNG using cairosvg and extract additional image attributes
+    try:
+        png_path = os.path.join(plots_dir, os.path.basename(self.file_path).replace('.svg', '.png'))
+        cairosvg.svg2png(url=self.file_path, write_to=png_path)
+        info['converted_png'] = png_path
+    except Exception as e:
+        info['svg_to_png_error'] = str(e)
+        return info
+
+    try:
+        # Open the converted PNG to extract additional attributes
+        with Image.open(png_path) as img:
+            info['png_image_size'] = img.size
+            info['png_mode'] = img.mode
+            info['png_format'] = img.format
+    except Exception as e:
+        info['png_image_error'] = str(e)
+
+    # Attempt to extract specific shape information from the SVG
+    try:
+        shape_count = 0
+        shape_types = set()
+        for elem in root.iter():
+            shape_types.add(elem.tag)
+            shape_count += 1
+        info['num_shapes'] = shape_count
+        info['shape_types'] = list(shape_types)
+    except Exception as e:
+        info['shape_info_error'] = str(e)
+
+    return info
 
