@@ -249,6 +249,7 @@ def read_file_info(instance):
 
                 last_result = instance.dynamic_method()
                 text_content = last_result.pop('text', None)
+                # logging.info(f'Last result: {last_result}')
 
                 improved_method = generate_improved_method(current_method, last_result, iteration)
                 intermediate_logic_path = os.path.join(os.path.dirname(__file__), f'intermediate_logic_iteration_{iteration + 1}.txt')
@@ -257,6 +258,8 @@ def read_file_info(instance):
 
                 sanitized_method = re.sub(r'^```.*\n', '', improved_method).strip().strip('```').strip()
                 sanitized_method = re.sub(r'^python\n', '', sanitized_method).strip()
+                
+                # logging.info(f"Sanitized Method Logic for Iteration {iteration + 1}:\n{sanitized_method}")
 
                 update_method_logic(sanitized_method, file_path)
 

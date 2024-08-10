@@ -104,7 +104,7 @@ class MyClass:
 
             except Exception as e:
                 logging.error(f"Error in method execution: {e}")
-                logging.info(f"Delaying request by {delay_duration} seconds due to fix attempt {attempt}")
+                logging.info(f"Delaying request by {delay_duration} seconds due to fix attempt {attempt + 1}")
                 time.sleep(delay_duration)
 
                 corrected_code = self.correct_method_code(method_name, method, e)
