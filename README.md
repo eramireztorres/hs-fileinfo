@@ -5,13 +5,13 @@ The Hot-Swapping Fileinfo App is a Python-based tool that extracts detailed info
 
 With the Hot-Swapping Fileinfo App, you can:
 
-    Analyze Various File Types: Extract metadata and content from a wide range of file formats such as images (JPG, PNG, SVG), documents (PDF, DOCX, XLSX), audio files (MP3, WAV), and more.
-    Dynamic Method Improvement: The app iteratively improves its methods for extracting file information, adapting based on the file content.
-    Custom Report Generation: Generate detailed PDF reports summarizing the extracted information, complete with contextual insights.
+- **Analyze Various File Types:** Extract metadata and content from a wide range of file formats such as images (JPG, PNG, SVG), documents (PDF, DOCX, XLSX), audio files (MP3, WAV), and more.
+- **Dynamic Method Improvement:** The app iteratively improves its methods for extracting file information, adapting based on the file content.
+- **Report Generation:** Generate detailed PDF reports summarizing the extracted information, complete with contextual insights.
 
 ## Tips for Use
 
-    If the initial extraction doesn't yield the desired result, you can try running the report generation process multiple times increasing the number of improvements. The app will continue refining its methods with each improvement, potentially leading to better results.
+- If the initial extraction doesn't yield the desired result, try running the report generation process multiple times, increasing the number of improvements. The app will continue refining its methods with each improvement, potentially leading to better results.
 
 ## Prerequisites
 
